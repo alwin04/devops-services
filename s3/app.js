@@ -24,7 +24,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.post("/add-sub", (req, res) => {
+app.post("/add-sub", async(req, res) => {
   const {a=0, b=0} = req.body;
   console.log(`A: ${a}, B: ${b}`);
 
