@@ -25,22 +25,30 @@ app.use(function (req, res, next) {
 });
 
 app.post("/add-sub", (req, res) => {
-  const {a=0, b=0} = req.body;
+  const { a = 0, b = 0 } = req.body;
   console.log(`A: ${a}, B: ${b}`);
 
-    // Call service S1 to get the sum
-    const sumResponse = await axios.get('http://s1:3001/sum', { params: { a, b } });
+  // Call service S1 to get the sum
+  axios.get('http://s1:3001/sum', { params: { a, b } })
+    .then(sumResponse => {
+      // Call service S2 to get the difference
+      axios.get('http://s2:3002/difference', { params: { a, b } })
+        .then(diffResponse => {
+          const sum = sumResponse.data;
+          const difference = diffResponse.data;
 
-    // Call service S2 to get the difference
-    const diffResponse = await axios.get('http://s2:3002/difference', { params: { a, b } });
-
-    const sum = sumResponse.data;
-    const difference = diffResponse.data;
-
-    res.json({ sum, difference });
-  
+          res.json({ sum, difference });
+        })
+        .catch(error => {
+          console.error(error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        });
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    });
 });
-
 /** 404 error */
 app.all("*", (req, res, next) => {
   const err = new HttpException(404, "Endpoint Not Found");
