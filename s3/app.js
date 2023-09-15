@@ -3,6 +3,7 @@
 
 // web server framework for Node.js applications
 const express = require("express");
+const axios = require('axios');
 // allows requests from web pages hosted on other domains
 const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
@@ -27,10 +28,17 @@ app.post("/add-sub", (req, res) => {
   const {a=0, b=0} = req.body;
   console.log(`A: ${a}, B: ${b}`);
 
-  //////////////////////////////////////
-  // Your logic to call S1 and S2 services to get the addition and subtraction
-  //////////////////////////////////////
+    // Call service S1 to get the sum
+    const sumResponse = await axios.get('http://s1:3001/sum', { params: { a, b } });
 
+    // Call service S2 to get the difference
+    const diffResponse = await axios.get('http://s2:3002/difference', { params: { a, b } });
+
+    const sum = sumResponse.data;
+    const difference = diffResponse.data;
+
+    res.json({ sum, difference });
+  
 });
 
 /** 404 error */
